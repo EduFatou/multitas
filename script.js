@@ -31,6 +31,7 @@ const arrayMultas = [
 const tablaContenido = document.querySelector('.tablaContenido');
 const divErrores = document.querySelector('.erroresContainer');
 const formulario = document.getElementById('matriculasForm');
+const fragment = document.createDocumentFragment();
 const regExp = /^\d{4}\-[A-Z]{3}$/;
 let matriculaValid = false;
 let matricula;
@@ -39,92 +40,48 @@ let matricula;
 //eventos
 formulario.addEventListener('submit', (ev) => {
     ev.preventDefault();
-    validarFormulario();
+    getInfo();
 });
 
 //funciones
-const validarFormulario = () => {
-    matricula = formulario.comprobarMatricula.value;
-
-    if (matricula !== '') {
-        if (regExp.test(matricula)) {
-            matriculaValid = true;
-        } else matriculaValid = false;
-
-    } else matriculaValid = false;
-
-    if (matriculaValid) {
-        alert('valido');
+const getMatricula = async(matricula)=> {
+    if(regExp.test(matricula)){
+        const dueño = arrayCoches.find((car)=>car.matricula === matricula)?.propietario
+        if(dueño) return dueño;
+        else {
+        throw 'No se encuentra la matrícula.';
+        }
     } else {
-        alert('novalido');
+        throw 'matrícula no válida.';  
     }
 };
 
-pintarTabla = () => {
-
-}
-
-
-/*
-
-const validarFormulario = ()=> {
-    matricula = formulario.comprobarMatricula.value;
-
-    if (matricula !== '') {
-        if (regExp.test(matricula)) {
-            const getMatricula = async(matricula)=> {
-                const dueño = arrayCoches.find((car)=>car.matricula === matricula)?.propietario
-                    if(dueño) return(dueño);
-                    else throw('No se encuentra la matrícula.');
-            };
-            const getMultas = async(matricula)=> {
-                const multa = arrayMultas.find((bill)=>bill.matricula === matricula)?.multas
-                    if(multa) return(multa);
-                    else throw('La matrícula no tiene ninguna multa.');
-            };
-            const getInfo = async(matricula)=> {
-                try{
-                    const conductor = await getMatricula(matricula);
-                    const multa = await getMultas(matricula);
-                    return `${conductor} tiene ${multa}.`;
-
-                }catch(error){
-                    throw error
-                }
-            };
-            getInfo(matricula)
-            .then((respuesta)=>{console.log(respuesta)})
-            .catch((error)=>{console.log(error)})
-        };
-    };    
-};
-
-====================================================
-
-const getMatricula = async(matricula)=> {
-    const dueño = arrayCoches.find((car)=>car.matricula === matricula)?.propietario
-        if(dueño) return(dueño);
-        else throw('No se encuentra la matrícula.');
-};
 const getMultas = async(matricula)=> {
     const multa = arrayMultas.find((bill)=>bill.matricula === matricula)?.multas
-        if(multa) return(multa);
-        else throw('La matrícula no tiene ninguna multa.');
+        if(multa) return multa;
+        else throw 'La matrícula no tiene ninguna multa.';
 };
 
-
 const getInfo = async(matricula)=> {
+    matricula = formulario.comprobarMatricula.value;
     try{
         const conductor = await getMatricula(matricula);
         const multa = await getMultas(matricula);
-        return `${conductor} tiene ${multa}.`;
+
+        pintarTabla(conductor, multa);
 
     }catch(error){
-        throw error
+        divErrores.textContent = error;
     }
 };
 
 getInfo(matricula)
 .then((respuesta)=>{console.log(respuesta)})
 .catch((error)=>{console.log(error)})
-*/
+
+const pintarTabla = (conductor, multa)=> {
+    const fila = document.createElement('tr');
+    fila.innerHTML = `<td>${conductor.matricula}</td> <td>${conductor.modelo}</td> <td>${conductor.propietario}</td> <td>${multa.length}</td>`;
+    fragment.append(fila);
+    tablaContenido.append(fragment);
+}
